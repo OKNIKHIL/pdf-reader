@@ -1,4 +1,5 @@
 import streamlit as st
+from dotenv import load_dotenv
 import pickle
 from PyPDF2 import PdfReader
 from streamlit_extras.add_vertical_space import add_vertical_space
@@ -39,6 +40,8 @@ with st.sidebar:
         </ul>
     </div>
     ''', unsafe_allow_html=True)
+
+load_dotenv()
 
 def main():
     st.header("Chat with PDF 💬")
