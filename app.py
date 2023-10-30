@@ -1,5 +1,4 @@
 import streamlit as st
-from dotenv import load_dotenv
 import pickle
 from PyPDF2 import PdfReader
 from streamlit_extras.add_vertical_space import add_vertical_space
@@ -10,6 +9,9 @@ from langchain.llms import OpenAI
 from langchain.chains.question_answering import load_qa_chain
 from langchain.callbacks import get_openai_callback
 import os
+headers={
+    "authorization":st.secrets[OPENAI_API_KEY]
+}
 
 # Sidebar contents
 with st.sidebar:
@@ -41,7 +43,6 @@ with st.sidebar:
     </div>
     ''', unsafe_allow_html=True)
 
-load_dotenv()
 
 def main():
     st.header("Chat with PDF 💬")
