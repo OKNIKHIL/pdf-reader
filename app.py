@@ -41,8 +41,6 @@ with st.sidebar:
     </div>
     ''', unsafe_allow_html=True)
 
-load_dotenv()
-
 def main():
     st.header("Chat with PDF 💬")
     chat_history = set()  # Initialize an empty set for chat history
