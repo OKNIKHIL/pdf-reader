@@ -15,27 +15,42 @@ import os
 with st.sidebar:
     st.title('🤗💬  Chat App')
     st.markdown('''
-    ## About
-    This app is an LLM-powered chatbot built using:
-    - [Streamlit](https://streamlit.io/)
-    - [LangChain](https://python.langchain.com/)
-    - [OpenAI](https://platform.openai.com/docs/models) LLM model
+    <style>
+        /* Add your custom CSS code here */
+        .sidebar-content {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .sidebar-title {
+            color: #333333;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
 
-    ''')
-
+    <div class="sidebar-content">
+        <div class="sidebar-title">About</div>
+        <p>This app is an LLM-powered chatbot built using:</p>
+        <ul>
+            <li><a href="https://streamlit.io/">Streamlit</a></li>
+            <li><a href="https://python.langchain.com/">LangChain</a></li>
+            <li><a href="https://platform.openai.com/docs/models">OpenAI LLM model</a></li>
+        </ul>
+    </div>
+    ''', unsafe_allow_html=True)
 
 load_dotenv()
 
 def main():
     st.header("Chat with PDF 💬")
-    chat_history = []  # Initialize an empty list for chat history
+    chat_history = set()  # Initialize an empty set for chat history
+    question_counter = 0  # Initialize a counter for questions
 
-    
     # upload a PDF file
     pdf = st.file_uploader("Upload your PDF", type='pdf')
 
-
-    # st.write(pdf)
     if pdf is not None:
         pdf_reader = PdfReader(pdf)
         
@@ -50,15 +65,13 @@ def main():
             )
         chunks = text_splitter.split_text(text=text)
 
-        # # embeddings
+        # embeddings
         store_name = pdf.name[:-4]
         st.write(f'{store_name}')
-        # st.write(chunks)
 
         if os.path.exists(f"{store_name}.pkl"):
             with open(f"{store_name}.pkl", "rb") as f:
                 VectorStore = pickle.load(f)
-            # st.write('Embeddings Loaded from the Disk')s
         else:
             import openai
             embeddings = OpenAIEmbeddings()
@@ -66,23 +79,25 @@ def main():
             with open(f"{store_name}.pkl", "wb") as f:
                 pickle.dump(VectorStore, f)
 
-        # Accept user questions/query
         query = st.text_input("Ask questions about your PDF file:")
-
+        
         if query:
-                docs = VectorStore.similarity_search(query=query, k=3)
- 
-                llm = OpenAI()
-                chain = load_qa_chain(llm=llm, chain_type="stuff")
-                with get_openai_callback() as cb:
-                    response = chain.run(input_documents=docs, question=query)
-                    print(cb)
-                st.write(response)
-            
+            docs = VectorStore.similarity_search(query=query, k=3)
+     
+            llm = OpenAI()
+            chain = load_qa_chain(llm=llm, chain_type="stuff")
+            with get_openai_callback() as cb:
+                response = chain.run(input_documents=docs, question=query)
+                print(cb)
+            st.write(response)
+
+            chat_history.add(query)
+            question_counter += 1
+
         if chat_history:
-            st.subheader("Chat History")
-            for question, answer in chat_history:
-                st.write(f"Q: {question}")
-                st.write(f"A: {answer}")    
-if __name__ == '__main__':
+            st.sidebar.subheader("Chat History")
+            for question in chat_history:
+                st.sidebar.write(f"Q: {question}")
+
+if __name__== '__main__':
     main()
